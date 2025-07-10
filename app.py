@@ -1,28 +1,25 @@
-import matplotlib.pyplot as plt
-import folium
-from textblob import TextBlob
+from flask import Flask, render_template, request, redirect, url_for
 import pandas as pd
+import os
+import matplotlib.pyplot as plt
+from textblob import TextBlob
+import folium
 from folium.plugins import MarkerCluster
 
-# Sample citizen messages
-messages = [
-    "There’s a huge pile of garbage near the community center. It’s been there for 3 days and smells awful!",
-    "The traffic on Main Street is unbearable during rush hour. Can something be done?",
-    "Great job on cleaning up the park! It looks beautiful now.",
-    "Loud music from the apartment complex next to the library is disturbing the neighborhood every night.",
-    "Water leakage near the school has been going on for a week. Please fix it urgently!"
-]
+app = Flask(__name__)
 
-# Location mapping for geolocation
+CSV_FILE = "citizen_feedback.csv"
+
 location_coords = {
     "community center": (49.2827, -123.1207),
-    "Main Street": (49.2636, -123.1386),
+    "main street": (49.2636, -123.1386),
     "park": (49.2845, -123.1119),
     "library": (49.2800, -123.1150),
     "school": (49.2781, -123.1225)
 }
 
-# Function to analyze messages
+os.makedirs("static", exist_ok=True)
+
 def analyze_message(msg):
     msg_lower = msg.lower()
     topic = "unknown"
@@ -36,7 +33,7 @@ def analyze_message(msg):
         topic = "infrastructure"
 
     urgency = "normal"
-    if "urgent" in msg_lower or "awful" in msg_lower:
+    if "urgent" in msg_lower or "awful" in msg_lower or "please fix" in msg_lower:
         urgency = "high"
 
     sentiment = TextBlob(msg).sentiment.polarity
@@ -56,53 +53,71 @@ def analyze_message(msg):
         "location": location
     }
 
-# Analyze all messages
-analysis_results = [analyze_message(msg) for msg in messages]
-df = pd.DataFrame(analysis_results)
+def update_dashboard(dataframe):
+    plt.figure(figsize=(6,4))
+    dataframe['topic'].value_counts().plot(kind='bar', color='skyblue')
+    plt.title("Topic Distribution")
+    plt.xlabel("Topic")
+    plt.ylabel("Count")
+    plt.tight_layout()
+    plt.savefig("static/topic_distribution.png")
+    plt.close()
 
-# Visualization: Topic Distribution
-plt.figure(figsize=(6,4))
-df['topic'].value_counts().plot(kind='bar', color='skyblue')
-plt.title("Topic Distribution")
-plt.xlabel("Topic")
-plt.ylabel("Count")
-plt.tight_layout()
-plt.savefig("topic_distribution.png")
-plt.close()
+    plt.figure(figsize=(6,4))
+    dataframe['urgency'].value_counts().plot(kind='bar', color='salmon')
+    plt.title("Urgency Levels")
+    plt.xlabel("Urgency")
+    plt.ylabel("Count")
+    plt.tight_layout()
+    plt.savefig("static/urgency_levels.png")
+    plt.close()
 
-# Visualization: Urgency Levels
-plt.figure(figsize=(6,4))
-df['urgency'].value_counts().plot(kind='bar', color='salmon')
-plt.title("Urgency Levels")
-plt.xlabel("Urgency")
-plt.ylabel("Count")
-plt.tight_layout()
-plt.savefig("urgency_levels.png")
-plt.close()
+    plt.figure(figsize=(6,4))
+    dataframe['sentiment'].value_counts().plot(kind='bar', color='lightgreen')
+    plt.title("Sentiment Analysis")
+    plt.xlabel("Sentiment")
+    plt.ylabel("Count")
+    plt.tight_layout()
+    plt.savefig("static/sentiment_analysis.png")
+    plt.close()
 
-# Visualization: Sentiment Analysis
-plt.figure(figsize=(6,4))
-df['sentiment'].value_counts().plot(kind='bar', color='lightgreen')
-plt.title("Sentiment Analysis")
-plt.xlabel("Sentiment")
-plt.ylabel("Count")
-plt.tight_layout()
-plt.savefig("sentiment_analysis.png")
-plt.close()
+    map_center = [49.2827, -123.1207]
+    feedback_map = folium.Map(location=map_center, zoom_start=13)
+    marker_cluster = MarkerCluster().add_to(feedback_map)
 
-# Geolocation Mapping
-map_center = [49.2827, -123.1207]
-feedback_map = folium.Map(location=map_center, zoom_start=13)
-marker_cluster = MarkerCluster().add_to(feedback_map)
+    for _, row in dataframe.iterrows():
+        loc_name = row['location']
+        if loc_name in location_coords:
+            lat, lon = location_coords[loc_name]
+            popup_text = f"Topic: {row['topic']}<br>Urgency: {row['urgency']}<br>Sentiment: {row['sentiment']}<br>Message: {row['message']}"
+            folium.Marker(location=[lat, lon], popup=popup_text).add_to(marker_cluster)
 
-for _, row in df.iterrows():
-    loc_name = row['location']
-    if loc_name in location_coords:
-        lat, lon = location_coords[loc_name]
-        popup_text = f"Topic: {row['topic']}<br>Urgency: {row['urgency']}<br>Sentiment: {row['sentiment']}<br>Message: {row['message']}"
-        folium.Marker(location=[lat, lon], popup=popup_text).add_to(marker_cluster)
+    feedback_map.save("static/citizen_feedback_map.html")
 
-feedback_map.save("citizen_feedback_map.html")
+@app.route('/')
+def form():
+    return render_template('form.html')
 
-# Save structured summary
-df.to_csv("citizen_feedback_summary.csv", index=False)
+@app.route('/submit', methods=['POST'])
+def submit():
+    message = request.form['message']
+    result = analyze_message(message)
+
+    if os.path.exists(CSV_FILE):
+        df = pd.read_csv(CSV_FILE)
+    else:
+        df = pd.DataFrame(columns=["message", "topic", "urgency", "sentiment", "location"])
+
+    df = pd.concat([df, pd.DataFrame([result])], ignore_index=True)
+    df.to_csv(CSV_FILE, index=False)
+
+    update_dashboard(df)
+
+    return redirect(url_for('dashboard'))
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)
