@@ -1,16 +1,97 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Citizen Feedback Form</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #e0f7fa, #fff);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h2 {
+            color: #00796b;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 1.1em;
+            color: #333;
+            display: block;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            resize: vertical;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            border-color: #00796b;
+            outline: none;
+        }
+
+        input[type="submit"] {
+            background-color: #00796b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #004d40;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            color: #00796b;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: #004d40;
+        }
+    </style>
 </head>
 <body>
-    <h2>Submit Your Feedback</h2>
-    <form action="/submit" method="post">
-        <label for="message">Your Message:</label><br>
-        <textarea name="message" rows="5" cols="60" required></textarea><br><br>
-        <input type="submit" value="Submit Feedback">
-    </form>
-    <br>
-    <a href="/dashboard">Go to Dashboard</a>
+    <div class="container">
+        <h2>Submit Your Feedback</h2>
+        <form action="/submit" method="post">
+            <label for="message">Your Message:</label>
+            <textarea name="message" rows="5" required></textarea>
+            <input type="submit" value="Submit Feedback">
+        </form>
+        <a href="/dashboard">Go to Dashboard</a>
+    </div>
 </body>
 </html>
