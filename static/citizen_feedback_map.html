@@ -1,209 +1,97 @@
+
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Citizen Feedback Map - India</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <!-- Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css" />
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
-    
-            <meta name="viewport" content="width=device-width,
-                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-            <style>
-                #map_571ade378ce80f14607163bc7baaa380 {
-                    position: relative;
-                    width: 100.0%;
-                    height: 100.0%;
-                    left: 0.0%;
-                    top: 0.0%;
-                }
-                .leaflet-container { font-size: 1rem; }
-            </style>
 
-            <style>html, body {
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-            }
-            </style>
-
-            <style>#map {
-                position:absolute;
-                top:0;
-                bottom:0;
-                right:0;
-                left:0;
-                }
-            </style>
-
-            <script>
-                L_NO_TOUCH = false;
-                L_DISABLE_3D = false;
-            </script>
-
-        
+    <!-- MarkerCluster CSS and JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/MarkerCluster.Default.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/leaflet.markercluster.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/MarkerCluster.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/MarkerCluster.Default.css"/>
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
-    
-    
-            <div class="folium-map" id="map_571ade378ce80f14607163bc7baaa380" ></div>
-        
+    <div id="map"></div>
+
+    <script>
+        // Initialize the map centered on India
+        var map = L.map('map').setView([22.9734, 78.6569], 5);
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Create a marker cluster group
+        var markers = L.markerClusterGroup();
+
+        // Add markers with popups
+        var cities = [
+            {
+                name: "Delhi",
+                coords: [28.6139, 77.2090],
+                feedback: "Water supply has been disrupted in the Rohini area for two days.",
+                topic: "Water Supply",
+                urgency: "High",
+                sentiment: "Negative"
+            },
+            {
+                name: "Mumbai",
+                coords: [19.0760, 72.8777],
+                feedback: "Streets in Andheri have been cleaned thoroughly. Great job!",
+                topic: "Sanitation",
+                urgency: "Normal",
+                sentiment: "Positive"
+            },
+            {
+                name: "Bengaluru",
+                coords: [12.9716, 77.5946],
+                feedback: "Loud construction noise near MG Road is disturbing residents.",
+                topic: "Noise Pollution",
+                urgency: "High",
+                sentiment: "Negative"
+            },
+            {
+                name: "Kolkata",
+                coords: [22.5726, 88.3639],
+                feedback: "Road repairs in Salt Lake are ongoing but causing traffic delays.",
+                topic: "Infrastructure",
+                urgency: "Normal",
+                sentiment: "Neutral"
+            }
+        ];
+
+        cities.forEach(function(city) {
+            var marker = L.marker(city.coords);
+            var popupContent = `
+                <strong>City:</strong> ${city.name}<br>
+                <strong>Topic:</strong> ${city.topic}<br>
+                <strong>Urgency:</strong> ${city.urgency}<br>
+                <strong>Sentiment:</strong> ${city.sentiment}<br>
+                <strong>Message:</strong> ${city.feedback}
+            `;
+            marker.bindPopup(popupContent);
+            markers.addLayer(marker);
+        });
+
+        map.addLayer(markers);
+    </script>
 </body>
-<script>
-    
-    
-            var map_571ade378ce80f14607163bc7baaa380 = L.map(
-                "map_571ade378ce80f14607163bc7baaa380",
-                {
-                    center: [49.2827, -123.1207],
-                    crs: L.CRS.EPSG3857,
-                    ...{
-  "zoom": 13,
-  "zoomControl": true,
-  "preferCanvas": false,
-}
-
-                }
-            );
-
-            
-
-        
-    
-            var tile_layer_3ca1136e57c054c33bbd54dd957393cb = L.tileLayer(
-                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                {
-  "minZoom": 0,
-  "maxZoom": 19,
-  "maxNativeZoom": 19,
-  "noWrap": false,
-  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
-  "subdomains": "abc",
-  "detectRetina": false,
-  "tms": false,
-  "opacity": 1,
-}
-
-            );
-        
-    
-            tile_layer_3ca1136e57c054c33bbd54dd957393cb.addTo(map_571ade378ce80f14607163bc7baaa380);
-        
-    
-            var marker_cluster_26570e4131ae75f2aba814ae56c871e1 = L.markerClusterGroup(
-                {
-}
-            );
-        
-    
-            var marker_c863f31fdfcb873d702dde9380973f07 = L.marker(
-                [49.2827, -123.1207],
-                {
-}
-            ).addTo(marker_cluster_26570e4131ae75f2aba814ae56c871e1);
-        
-    
-        var popup_e4f08a5e15d4f098dfc422a8a517fa4c = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_1f32e7b536a289deceb13498c1c885c7 = $(`<div id="html_1f32e7b536a289deceb13498c1c885c7" style="width: 100.0%; height: 100.0%;">Topic: sanitation<br>Urgency: high<br>Sentiment: negative<br>Message: There’s a huge pile of garbage near the community center. It’s been there for 3 days and smells awful!</div>`)[0];
-                popup_e4f08a5e15d4f098dfc422a8a517fa4c.setContent(html_1f32e7b536a289deceb13498c1c885c7);
-            
-        
-
-        marker_c863f31fdfcb873d702dde9380973f07.bindPopup(popup_e4f08a5e15d4f098dfc422a8a517fa4c)
-        ;
-
-        
-    
-    
-            var marker_d537c6d36a79337eb823fa7877afd53b = L.marker(
-                [49.2845, -123.1119],
-                {
-}
-            ).addTo(marker_cluster_26570e4131ae75f2aba814ae56c871e1);
-        
-    
-        var popup_9b2b6e3bf96b84ec2303201fa7498e63 = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_a877b080ad256eeb4dfd682324b3e299 = $(`<div id="html_a877b080ad256eeb4dfd682324b3e299" style="width: 100.0%; height: 100.0%;">Topic: sanitation<br>Urgency: normal<br>Sentiment: positive<br>Message: Great job on cleaning up the park! It looks beautiful now.</div>`)[0];
-                popup_9b2b6e3bf96b84ec2303201fa7498e63.setContent(html_a877b080ad256eeb4dfd682324b3e299);
-            
-        
-
-        marker_d537c6d36a79337eb823fa7877afd53b.bindPopup(popup_9b2b6e3bf96b84ec2303201fa7498e63)
-        ;
-
-        
-    
-    
-            var marker_37e72c473da0814bd03df5360768afba = L.marker(
-                [49.28, -123.115],
-                {
-}
-            ).addTo(marker_cluster_26570e4131ae75f2aba814ae56c871e1);
-        
-    
-        var popup_1b4c1ca601a9ff2918ed3a81a2b60b55 = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_aaa95ca29c7bb2e3c949d6a9745c56ee = $(`<div id="html_aaa95ca29c7bb2e3c949d6a9745c56ee" style="width: 100.0%; height: 100.0%;">Topic: noise<br>Urgency: normal<br>Sentiment: negative<br>Message: Loud music from the apartment complex next to the library is disturbing the neighborhood every night.</div>`)[0];
-                popup_1b4c1ca601a9ff2918ed3a81a2b60b55.setContent(html_aaa95ca29c7bb2e3c949d6a9745c56ee);
-            
-        
-
-        marker_37e72c473da0814bd03df5360768afba.bindPopup(popup_1b4c1ca601a9ff2918ed3a81a2b60b55)
-        ;
-
-        
-    
-    
-            var marker_dd9b9dd8de49958c7153b0e2bb68159e = L.marker(
-                [49.2781, -123.1225],
-                {
-}
-            ).addTo(marker_cluster_26570e4131ae75f2aba814ae56c871e1);
-        
-    
-        var popup_59b571d7a68b01ab12348c19cf686905 = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_deffce74f6a31e9d12de43a83a606fec = $(`<div id="html_deffce74f6a31e9d12de43a83a606fec" style="width: 100.0%; height: 100.0%;">Topic: infrastructure<br>Urgency: high<br>Sentiment: positive<br>Message: Water leakage near the school has been going on for a week. Please fix it urgently!</div>`)[0];
-                popup_59b571d7a68b01ab12348c19cf686905.setContent(html_deffce74f6a31e9d12de43a83a606fec);
-            
-        
-
-        marker_dd9b9dd8de49958c7153b0e2bb68159e.bindPopup(popup_59b571d7a68b01ab12348c19cf686905)
-        ;
-
-        
-    
-    
-            marker_cluster_26570e4131ae75f2aba814ae56c871e1.addTo(map_571ade378ce80f14607163bc7baaa380);
-        
-</script>
 </html>
